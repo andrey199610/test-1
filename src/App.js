@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { firestore } from "./firebase/config";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import "./app.css";
+import Tasks from "./components/tasks";
 
 const onDragEnd = (result, columns, setColumns) => {
   if (!result.destination) return;
   const { source, destination } = result;
-  console.log(source, destination);
+  console.log(result.draggableId);
   if (source.droppableId !== destination.droppableId) {
     const sourceColumn = columns[source.droppableId];
     const destColumn = columns[destination.droppableId];
     const sourceItems = [...sourceColumn.items];
     const destItems = [...destColumn.items];
-    console.log("destItems", sourceColumn);
     const [removed] = sourceItems.splice(source.index, 1);
     destItems.splice(destination.index, 0, removed);
     setColumns({
@@ -28,7 +28,6 @@ const onDragEnd = (result, columns, setColumns) => {
     });
   } else {
     const column = columns[source.droppableId];
-
     const copiedItems = [...column.items];
     const [removed] = copiedItems.splice(source.index, 1);
     copiedItems.splice(destination.index, 0, removed);
@@ -59,18 +58,6 @@ function App() {
   }, []);
 
   return (
-    // <div>
-    //   {tasks.map((task) => (
-    //     <div key={task.id}>
-    //       <div>{task.name}</div>
-    //       <div>
-    //         {task.items.map((item) => (
-    //           <span key={item.id}>{item.name}</span>
-    //         ))}
-    //       </div>
-    //     </div>
-    //   ))}
-    // </div>
     <div className="wrapper">
       <DragDropContext
         onDragEnd={(result) => onDragEnd(result, columns, setColumns)}
@@ -97,34 +84,11 @@ function App() {
                       >
                         {column.items.map((item, index) => {
                           return (
-                            <Draggable
+                            <Tasks
+                              item={item}
                               key={item.id}
-                              draggableId={item.id}
                               index={index}
-                            >
-                              {(provided, snapshot) => {
-                                return (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    style={{
-                                      userSelect: "none",
-                                      padding: 16,
-                                      margin: "0 0 8px 0",
-                                      minHeight: "50px",
-                                      backgroundColor: snapshot.isDragging
-                                        ? "#263B4A"
-                                        : "#456C86",
-                                      color: "white",
-                                      ...provided.draggableProps.style,
-                                    }}
-                                  >
-                                    {item.name}
-                                  </div>
-                                );
-                              }}
-                            </Draggable>
+                            ></Tasks>
                           );
                         })}
                         {provided.placeholder}
